@@ -1,0 +1,26 @@
+{
+    "admin": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+    "user": "e606e38b0d8c19b24cf0ee3808183162ea7cd63ff7912dbb22b5e803286b4446",
+    "muiz": "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f",
+    "semyon": "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f",
+    "weer": "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f",
+    "muz": {
+        "password": "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f",
+        "fio": "G H G",
+        "email": "mui@mail.com",
+        "operator_id": 503002
+    },
+    "123": {
+        "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+        "fio": "wewwrwrwer",
+        "email": "rwrwerwerwer",
+        "operator_id": 596800
+    },
+    "укп": {
+        "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+        "fio": "укрп",
+        "email": "яукр",
+        "operator_id": 582953,
+        "age": "101"
+    }
+}

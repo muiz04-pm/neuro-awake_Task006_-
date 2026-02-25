@@ -1,0 +1,23 @@
+{
+    "ivanov": {
+        "password": "6f86ded7f21c4fa38e743da647865b1fba355b6535758132285772e8d2fde2fc",
+        "fio": "Иванов Иван Иванович",
+        "age": "18",
+        "operator_id": "OP001",
+        "registration_date": "24.02.2026 11:40:22"
+    },
+    "petrov": {
+        "password": "c07d9e69d90a576c8a6690b35cc0912f48677cea2f560cf737058524744aff68",
+        "fio": "Петров Петр Петрович",
+        "age": "25",
+        "operator_id": "OP002",
+        "registration_date": "24.02.2026 11:40:22"
+    },
+    "semyon": {
+        "password": "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f",
+        "fio": "Бузанов Семён Александрович",
+        "age": "18",
+        "operator_id": "OPBD53C2",
+        "registration_date": "24.02.2026 11:42:52"
+    }
+}
