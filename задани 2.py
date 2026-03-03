@@ -1,32 +1,35 @@
-import tkinter as tk
-from tkinter import ttk
-import math
-import random
-import sys
-from PIL import Image, ImageTk, ImageDraw
-import os
+import tkinter as tk  # Импорт основной библиотеки для создания GUI
+from tkinter import ttk  # Импорт расширенных виджетов tkinter
+import math  # Импорт математических функций (тригонометрия, константы)
+import random  # Импорт для генерации случайных чисел
+import sys  # Импорт системных функций (для завершения программы)
+from PIL import Image, ImageTk, ImageDraw  # Импорт библиотеки для работы с изображениями
+import os  # Импорт для работы с файловой системой
 
 
 class SolarSystemSimulation:
+    """Главный класс симуляции Солнечной системы"""
+
     def __init__(self, root):
-        self.root = root
-        self.root.title("Симуляция Солнечной системы")
-        self.root.geometry("1600x900")
-        self.root.configure(bg='#000010')
-        self.root.resizable(False, False)
+        """Конструктор класса, инициализация всех компонентов"""
+        self.root = root  # Сохраняем ссылку на главное окно
+        self.root.title("Симуляция Солнечной системы")  # Устанавливаем заголовок окна
+        self.root.geometry("1600x900")  # Устанавливаем размер окна (ширина x высота)
+        self.root.configure(bg='#000010')  # Устанавливаем цвет фона (темно-синий)
+        self.root.resizable(False, False)  # Запрещаем изменение размера окна
 
         # Обработка закрытия окна
-        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)  # Привязываем функцию закрытия окна
 
-        # Константы
-        self.AU = 90
-        self.BASE_SPEED = 0.001
-        self.time_multiplier = 1.0
-        self.zoom_factor = 1.0
-        self.selected_planet = None
-        self.paused = False
-        self.animation_id = None
-        self.running = True
+        # Константы симуляции
+        self.AU = 90  # Астрономическая единица в пикселях (расстояние от Солнца до Земли)
+        self.BASE_SPEED = 0.001  # Базовая скорость анимации
+        self.time_multiplier = 1.0  # Множитель времени (ускорение/замедление)
+        self.zoom_factor = 1.0  # Коэффициент масштабирования
+        self.selected_planet = None  # Текущая выбранная планета (изначально None)
+        self.paused = False  # Флаг паузы (False - анимация активна)
+        self.animation_id = None  # ID текущей анимации для возможности отмены
+        self.running = True  # Флаг работы программы (True - работает)
 
         # Словарь для хранения изображений планет
         self.planet_images = {}
@@ -34,7 +37,7 @@ class SolarSystemSimulation:
         # Создание изображений планет
         self.create_planet_images()
 
-        # Данные о планетах
+        # Данные о планетах (список словарей)
         self.planets_data = [
             # Внутренние планеты
             {"name": "Меркурий", "distance": 0.4, "radius": 5, "color": "#A9A9A9",
@@ -83,7 +86,7 @@ class SolarSystemSimulation:
              "speed": 1 / 249.0, "angle": random.uniform(0, 2 * math.pi), "image_key": "ixion"},
         ]
 
-        # Данные для информационной панели
+        # Данные для информационной панели (подробная информация о планетах)
         self.planet_info = {}
 
         # Создание интерфейса
@@ -96,7 +99,7 @@ class SolarSystemSimulation:
         self.animate()
 
     def create_planet_images(self):
-        """Создание изображений планет"""
+        """Создание изображений планет (загрузка из файлов или генерация)"""
         try:
             # Пытаемся загрузить реальные изображения, если они есть
             image_files = {
@@ -112,10 +115,10 @@ class SolarSystemSimulation:
 
             # Если файлы есть, загружаем их
             for key, filename in image_files.items():
-                if os.path.exists(filename):
-                    img = Image.open(filename)
-                    img = img.resize((150, 150), Image.Resampling.LANCZOS)
-                    self.planet_images[key] = ImageTk.PhotoImage(img)
+                if os.path.exists(filename):  # Проверяем существование файла
+                    img = Image.open(filename)  # Открываем изображение
+                    img = img.resize((150, 150), Image.Resampling.LANCZOS)  # Изменяем размер
+                    self.planet_images[key] = ImageTk.PhotoImage(img)  # Конвертируем для tkinter
                 else:
                     # Если файла нет, создаем синтетическое изображение
                     self.create_synthetic_image(key)
@@ -128,11 +131,11 @@ class SolarSystemSimulation:
                 self.create_synthetic_image(key)
 
     def create_synthetic_image(self, key):
-        """Создание синтетического изображения планеты"""
+        """Создание синтетического изображения планеты с помощью рисования"""
         try:
             # Создаем изображение
-            img = Image.new('RGB', (150, 150), color='#1a1a2e')
-            draw = ImageDraw.Draw(img)
+            img = Image.new('RGB', (150, 150), color='#1a1a2e')  # Новое изображение с фоном
+            draw = ImageDraw.Draw(img)  # Создаем объект для рисования
 
             # Цвета для разных планет
             colors = {
@@ -156,43 +159,43 @@ class SolarSystemSimulation:
                 "ixion": "#9ACD32"
             }
 
-            color = colors.get(key, "#FFFFFF")
+            color = colors.get(key, "#FFFFFF")  # Получаем цвет или белый по умолчанию
 
-            # Рисуем планету
+            # Рисуем планету (эллипс)
             draw.ellipse([25, 25, 125, 125], fill=color, outline='white', width=2)
 
             # Добавляем детали в зависимости от планеты
             if key == "earth":
-                # Континенты Земли
+                # Континенты Земли (дуги)
                 draw.arc([35, 35, 115, 115], start=30, end=150, fill='#228B22', width=3)
                 draw.arc([35, 35, 115, 115], start=210, end=330, fill='#228B22', width=3)
-                # Облака
+                # Облака (эллипсы)
                 draw.ellipse([45, 45, 65, 55], fill='white', outline=None)
                 draw.ellipse([85, 75, 105, 85], fill='white', outline=None)
             elif key == "jupiter":
-                # Полосы Юпитера
+                # Полосы Юпитера (дуги)
                 draw.arc([30, 60, 120, 90], start=0, end=360, fill='#8B4513', width=4)
                 draw.arc([30, 70, 120, 100], start=0, end=360, fill='#CD853F', width=3)
-                # Большое красное пятно
+                # Большое красное пятно (эллипс)
                 draw.ellipse([70, 65, 90, 80], fill='#8B0000', outline=None)
             elif key == "saturn":
-                # Кольца Сатурна
+                # Кольца Сатурна (эллипсы)
                 draw.ellipse([10, 55, 140, 95], outline='#D2B48C', width=3)
                 draw.ellipse([15, 50, 135, 100], outline='#D2B48C', width=2)
                 draw.ellipse([20, 45, 130, 105], outline='#DEB887', width=1)
             elif key == "mars":
-                # Поверхность Марса
+                # Поверхность Марса (точки)
                 draw.point((70, 70), fill='#8B4513')
                 draw.point((80, 80), fill='#8B4513')
                 draw.point((90, 60), fill='#8B4513')
-                # Полярные шапки
+                # Полярные шапки (эллипс)
                 draw.ellipse([50, 30, 100, 45], fill='white', outline=None)
             elif key == "venus":
-                # Облака Венеры
+                # Облака Венеры (эллипсы)
                 draw.ellipse([55, 45, 95, 105], fill='#FFFFFF', outline=None)
                 draw.ellipse([45, 55, 105, 95], fill='#F0E68C', outline=None)
             elif key == "mercury":
-                # Кратеры Меркурия
+                # Кратеры Меркурия (эллипсы)
                 draw.ellipse([45, 45, 65, 65], fill='#808080', outline=None)
                 draw.ellipse([85, 75, 105, 95], fill='#808080', outline=None)
                 draw.ellipse([60, 90, 75, 105], fill='#808080', outline=None)
@@ -214,7 +217,7 @@ class SolarSystemSimulation:
                 draw.point((70, 70), fill='#FFFFFF')
                 draw.point((80, 80), fill='#FFFFFF')
             elif key == "haumea":
-                # Хаумеа (эллипсоидная)
+                # Хаумеа (эллипсоидная форма)
                 draw.ellipse([35, 45, 115, 105], fill='#87CEEB', outline=None)
             elif key == "makemake":
                 # Макемаке
@@ -248,44 +251,44 @@ class SolarSystemSimulation:
             # Добавляем блик на всех планетах
             draw.ellipse([35, 35, 55, 55], fill='white', outline=None)
 
-            self.planet_images[key] = ImageTk.PhotoImage(img)
+            self.planet_images[key] = ImageTk.PhotoImage(img)  # Конвертируем для tkinter
         except Exception as e:
             print(f"Ошибка создания изображения для {key}: {e}")
-            self.planet_images[key] = None
+            self.planet_images[key] = None  # В случае ошибки сохраняем None
 
     def create_widgets(self):
         """Создание всех элементов интерфейса"""
         # Основной фрейм для canvas и панели информации
-        main_frame = tk.Frame(self.root, bg='#000010')
-        main_frame.pack(fill=tk.BOTH, expand=True)
+        main_frame = tk.Frame(self.root, bg='#000010')  # Создаем фрейм-контейнер
+        main_frame.pack(fill=tk.BOTH, expand=True)  # Размещаем с заполнением всего пространства
 
         # Левая панель с canvas (симуляция)
-        left_frame = tk.Frame(main_frame, bg='#000010')
-        left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        left_frame = tk.Frame(main_frame, bg='#000010')  # Фрейм для левой части
+        left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)  # Слева, с расширением
 
         # Canvas для отрисовки Солнечной системы
         self.canvas = tk.Canvas(left_frame, width=1100, height=800, bg='#000010', highlightthickness=0)
-        self.canvas.pack(pady=15, padx=15)
+        self.canvas.pack(pady=15, padx=15)  # Размещаем с отступами
 
         # Привязка событий мыши для выбора планет
-        self.canvas.bind("<Button-1>", self.on_canvas_click)
+        self.canvas.bind("<Button-1>", self.on_canvas_click)  # Левый клик мыши
 
         # Фрейм с ползунками управления
         controls_frame = tk.Frame(left_frame, bg='#1a1a2e', relief=tk.RAISED, bd=3)
-        controls_frame.pack(fill=tk.X, padx=15, pady=10)
+        controls_frame.pack(fill=tk.X, padx=15, pady=10)  # Растягиваем по горизонтали
 
         # Ползунок ускорения времени
         tk.Label(controls_frame, text="Ускорение времени:", bg='#1a1a2e', fg='white',
-                 font=('Arial', 12)).pack(side=tk.LEFT, padx=10)
+                 font=('Arial', 12)).pack(side=tk.LEFT, padx=10)  # Метка
 
         self.time_scale = tk.Scale(controls_frame, from_=0.5, to=20, orient=tk.HORIZONTAL,
                                    length=250, resolution=0.5, bg='#1a1a2e', fg='white',
                                    font=('Arial', 10), command=self.change_time_speed)
-        self.time_scale.set(1.0)
-        self.time_scale.pack(side=tk.LEFT, padx=10)
+        self.time_scale.set(1.0)  # Устанавливаем начальное значение
+        self.time_scale.pack(side=tk.LEFT, padx=10)  # Размещаем слева
 
         tk.Label(controls_frame, text="x1", bg='#1a1a2e', fg='white',
-                 font=('Arial', 12)).pack(side=tk.LEFT, padx=5)
+                 font=('Arial', 12)).pack(side=tk.LEFT, padx=5)  # Метка единицы измерения
 
         # Отображение текущего ускорения
         self.speed_label = tk.Label(controls_frame, text="1.0x", bg='#1a1a2e', fg='yellow',
@@ -294,33 +297,33 @@ class SolarSystemSimulation:
 
         # Ползунок зума
         tk.Label(controls_frame, text="Зум:", bg='#1a1a2e', fg='white',
-                 font=('Arial', 12)).pack(side=tk.LEFT, padx=25)
+                 font=('Arial', 12)).pack(side=tk.LEFT, padx=25)  # Метка
 
         self.zoom_scale = tk.Scale(controls_frame, from_=0.3, to=3.0, orient=tk.HORIZONTAL,
                                    length=200, resolution=0.1, bg='#1a1a2e', fg='white',
                                    font=('Arial', 10), command=self.change_zoom)
-        self.zoom_scale.set(1.0)
-        self.zoom_scale.pack(side=tk.LEFT, padx=10)
+        self.zoom_scale.set(1.0)  # Начальный зум
+        self.zoom_scale.pack(side=tk.LEFT, padx=10)  # Размещаем
 
         tk.Label(controls_frame, text="1.0x", bg='#1a1a2e', fg='white',
-                 font=('Arial', 12)).pack(side=tk.LEFT, padx=5)
+                 font=('Arial', 12)).pack(side=tk.LEFT, padx=5)  # Метка
 
         # Кнопка паузы
         self.pause_btn = tk.Button(controls_frame, text="⏸️ Пауза", command=self.toggle_pause,
                                    bg='#4a4a6a', fg='white', font=('Arial', 11, 'bold'),
                                    width=10, height=1)
-        self.pause_btn.pack(side=tk.RIGHT, padx=15)
+        self.pause_btn.pack(side=tk.RIGHT, padx=15)  # Справа
 
         # Кнопка сброса
         reset_btn = tk.Button(controls_frame, text="🔄 Сброс", command=self.reset_simulation,
                               bg='#4a4a6a', fg='white', font=('Arial', 11, 'bold'),
                               width=10, height=1)
-        reset_btn.pack(side=tk.RIGHT, padx=10)
+        reset_btn.pack(side=tk.RIGHT, padx=10)  # Справа от кнопки паузы
 
         # Правая панель с информацией о планете
         self.info_frame = tk.Frame(main_frame, width=400, bg='#1a1a2e', relief=tk.RAISED, bd=3)
-        self.info_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=15, pady=15)
-        self.info_frame.pack_propagate(False)
+        self.info_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=15, pady=15)  # Справа, по высоте
+        self.info_frame.pack_propagate(False)  # Запрещаем изменение размера
 
         # Заголовок информационной панели
         tk.Label(self.info_frame, text="Информация о планете", bg='#1a1a2e', fg='white',
@@ -328,16 +331,16 @@ class SolarSystemSimulation:
 
         # Фрейм для изображения планеты
         self.image_frame = tk.Frame(self.info_frame, bg='#1a1a2e', height=200)
-        self.image_frame.pack(fill=tk.X, pady=10)
-        self.image_frame.pack_propagate(False)
+        self.image_frame.pack(fill=tk.X, pady=10)  # По горизонтали
+        self.image_frame.pack_propagate(False)  # Фиксированная высота
 
         # Метка для изображения
         self.planet_image_label = tk.Label(self.image_frame, bg='#1a1a2e')
-        self.planet_image_label.pack(expand=True)
+        self.planet_image_label.pack(expand=True)  # Центрируем
 
         # Фрейм для содержимого информации
         self.info_content = tk.Frame(self.info_frame, bg='#1a1a2e')
-        self.info_content.pack(fill=tk.BOTH, expand=True, padx=15, pady=10)
+        self.info_content.pack(fill=tk.BOTH, expand=True, padx=15, pady=10)  # Заполняем
 
         # Начальное сообщение
         self.show_welcome_message()
@@ -346,19 +349,19 @@ class SolarSystemSimulation:
         """Сбор справочной информации о планетах для отображения"""
         self.planet_info = {
             "Меркурий": {
-                "radius_km": 2440,
-                "mass_kg": "3.30×10²³",
-                "mass_earth": 0.055,
-                "density": 5.43,
-                "gravity": 3.7,
-                "temperature": "-173°C до +427°C",
-                "orbital_period": "88 дней",
-                "rotation_period": "58.6 дней",
-                "atmosphere": "Почти отсутствует",
-                "moons": 0,
-                "discovery": "Известна с древности",
-                "name_origin": "Римский бог торговли",
-                "features": "Наибольшие суточные перепады температур в Солнечной системе"
+                "radius_km": 2440,  # Радиус в км
+                "mass_kg": "3.30×10²³",  # Масса в кг
+                "mass_earth": 0.055,  # Масса в массах Земли
+                "density": 5.43,  # Плотность в г/см³
+                "gravity": 3.7,  # Ускорение свободного падения в м/с²
+                "temperature": "-173°C до +427°C",  # Температура
+                "orbital_period": "88 дней",  # Орбитальный период
+                "rotation_period": "58.6 дней",  # Период вращения
+                "atmosphere": "Почти отсутствует",  # Состав атмосферы
+                "moons": 0,  # Количество спутников
+                "discovery": "Известна с древности",  # Дата открытия
+                "name_origin": "Римский бог торговли",  # Происхождение названия
+                "features": "Наибольшие суточные перепады температур в Солнечной системе"  # Особенности
             },
             "Венера": {
                 "radius_km": 6052,
@@ -621,29 +624,29 @@ class SolarSystemSimulation:
         """Показывает приветственное сообщение в информационной панели"""
         try:
             for widget in self.info_content.winfo_children():
-                widget.destroy()
+                widget.destroy()  # Удаляем все виджеты из фрейма
 
             # Очищаем изображение
             self.planet_image_label.config(image='')
 
             tk.Label(self.info_content, text="🌌", bg='#1a1a2e', fg='white',
-                     font=('Arial', 64)).pack(pady=30)
+                     font=('Arial', 64)).pack(pady=30)  # Иконка галактики
 
             tk.Label(self.info_content, text="Добро пожаловать в симуляцию\nСолнечной системы!",
-                     bg='#1a1a2e', fg='white', font=('Arial', 16, 'bold')).pack(pady=15)
+                     bg='#1a1a2e', fg='white', font=('Arial', 16, 'bold')).pack(pady=15)  # Приветствие
 
             tk.Label(self.info_content, text="Нажмите на любую планету,\nчтобы увидеть информацию о ней",
-                     bg='#1a1a2e', fg='#ADD8E6', font=('Arial', 14)).pack(pady=15)
+                     bg='#1a1a2e', fg='#ADD8E6', font=('Arial', 14)).pack(pady=15)  # Инструкция
 
             tk.Label(self.info_content, text="В симуляции представлены:",
-                     bg='#1a1a2e', fg='yellow', font=('Arial', 14, 'bold')).pack(pady=(25, 10))
+                     bg='#1a1a2e', fg='yellow', font=('Arial', 14, 'bold')).pack(pady=(25, 10))  # Заголовок
 
             planets_list = "• 8 основных планет\n• 5 карликовых планет\n• 5 транснептуновых объектов\n• Пояс астероидов\n• Пояс Койпера"
             tk.Label(self.info_content, text=planets_list, bg='#1a1a2e', fg='white',
-                     font=('Arial', 12), justify=tk.LEFT).pack(pady=10)
+                     font=('Arial', 12), justify=tk.LEFT).pack(pady=10)  # Список объектов
 
             tk.Label(self.info_content, text="Управление:",
-                     bg='#1a1a2e', fg='yellow', font=('Arial', 14, 'bold')).pack(pady=(25, 10))
+                     bg='#1a1a2e', fg='yellow', font=('Arial', 14, 'bold')).pack(pady=(25, 10))  # Заголовок управления
 
             controls = [
                 "• Ползунок скорости: ускорение времени",
@@ -654,18 +657,18 @@ class SolarSystemSimulation:
 
             for ctrl in controls:
                 tk.Label(self.info_content, text=ctrl, bg='#1a1a2e', fg='white',
-                         font=('Arial', 11), anchor='w', justify=tk.LEFT).pack(fill=tk.X, pady=3)
+                         font=('Arial', 11), anchor='w', justify=tk.LEFT).pack(fill=tk.X, pady=3)  # Элементы управления
         except:
-            pass
+            pass  # Игнорируем ошибки при создании интерфейса
 
     def show_planet_info(self, planet_name):
         """Отображает информацию о выбранной планете"""
         try:
-            if planet_name not in self.planet_info:
-                self.show_basic_info(planet_name)
+            if planet_name not in self.planet_info:  # Если нет подробной информации
+                self.show_basic_info(planet_name)  # Показываем базовую
                 return
 
-            info = self.planet_info[planet_name]
+            info = self.planet_info[planet_name]  # Получаем информацию о планете
 
             # Очищаем предыдущее содержимое
             for widget in self.info_content.winfo_children():
@@ -680,9 +683,9 @@ class SolarSystemSimulation:
 
             # Отображаем изображение планеты
             if image_key and image_key in self.planet_images and self.planet_images[image_key]:
-                self.planet_image_label.config(image=self.planet_images[image_key])
+                self.planet_image_label.config(image=self.planet_images[image_key])  # Устанавливаем изображение
             else:
-                self.planet_image_label.config(image='')
+                self.planet_image_label.config(image='')  # Убираем изображение
 
             # Название планеты
             tk.Label(self.info_content, text=f"🪐 {planet_name}", bg='#1a1a2e', fg='#FFD700',
@@ -723,24 +726,24 @@ class SolarSystemSimulation:
 
             tk.Label(self.info_content, text=info['features'],
                      bg='#1a1a2e', fg='white', font=('Arial', 11),
-                     wraplength=350, justify=tk.LEFT).pack(pady=8)
+                     wraplength=350, justify=tk.LEFT).pack(pady=8)  # Интересный факт с переносом
         except:
-            pass
+            pass  # Игнорируем ошибки отображения
 
     def show_basic_info(self, planet_name):
         """Показывает базовую информацию для планет без подробных данных"""
         try:
             for widget in self.info_content.winfo_children():
-                widget.destroy()
+                widget.destroy()  # Очищаем фрейм
 
             # Очищаем изображение
             self.planet_image_label.config(image='')
 
             tk.Label(self.info_content, text=f"🪐 {planet_name}", bg='#1a1a2e', fg='#FFD700',
-                     font=('Arial', 20, 'bold')).pack(pady=30)
+                     font=('Arial', 20, 'bold')).pack(pady=30)  # Название планеты
 
             tk.Label(self.info_content, text="Подробная информация\nотсутствует",
-                     bg='#1a1a2e', fg='white', font=('Arial', 14)).pack(pady=15)
+                     bg='#1a1a2e', fg='white', font=('Arial', 14)).pack(pady=15)  # Сообщение
 
             # Находим планету в данных и показываем базовые параметры
             for planet in self.planets_data:
@@ -754,126 +757,126 @@ class SolarSystemSimulation:
     def add_info_row(self, label, value):
         """Добавляет строку с информацией в панель"""
         try:
-            row = tk.Frame(self.info_content, bg='#1a1a2e')
-            row.pack(fill=tk.X, pady=4)
+            row = tk.Frame(self.info_content, bg='#1a1a2e')  # Создаем фрейм для строки
+            row.pack(fill=tk.X, pady=4)  # Размещаем с заполнением
 
             tk.Label(row, text=label, bg='#1a1a2e', fg='#ADD8E6',
-                     font=('Arial', 11, 'bold'), width=20, anchor='w').pack(side=tk.LEFT)
+                     font=('Arial', 11, 'bold'), width=20, anchor='w').pack(side=tk.LEFT)  # Метка
 
             tk.Label(row, text=value, bg='#1a1a2e', fg='white',
-                     font=('Arial', 11), anchor='w').pack(side=tk.LEFT, padx=8)
+                     font=('Arial', 11), anchor='w').pack(side=tk.LEFT, padx=8)  # Значение
         except:
             pass
 
     def change_time_speed(self, val):
         """Изменение скорости симуляции"""
-        self.time_multiplier = float(val)
-        self.speed_label.config(text=f"{self.time_multiplier:.1f}x")
+        self.time_multiplier = float(val)  # Устанавливаем множитель времени
+        self.speed_label.config(text=f"{self.time_multiplier:.1f}x")  # Обновляем текст метки
 
     def change_zoom(self, val):
         """Изменение масштаба"""
-        self.zoom_factor = float(val)
+        self.zoom_factor = float(val)  # Устанавливаем коэффициент зума
 
     def toggle_pause(self):
         """Пауза/продолжение симуляции"""
-        self.paused = not self.paused
+        self.paused = not self.paused  # Инвертируем флаг паузы
         if self.paused:
-            self.pause_btn.config(text="▶️ Пуск")
+            self.pause_btn.config(text="▶️ Пуск")  # Меняем текст кнопки
         else:
-            self.pause_btn.config(text="⏸️ Пауза")
-            self.animate()
+            self.pause_btn.config(text="⏸️ Пауза")  # Меняем текст кнопки
+            self.animate()  # Перезапускаем анимацию
 
     def reset_simulation(self):
         """Сброс симуляции"""
         # Сбрасываем углы планет в случайные позиции
         for planet in self.planets_data:
-            planet["angle"] = random.uniform(0, 2 * math.pi)
+            planet["angle"] = random.uniform(0, 2 * math.pi)  # Случайный угол
 
         # Сбрасываем ползунки
-        self.time_scale.set(1.0)
-        self.zoom_scale.set(1.0)
-        self.time_multiplier = 1.0
-        self.zoom_factor = 1.0
-        self.speed_label.config(text="1.0x")
+        self.time_scale.set(1.0)  # Сбрасываем скорость
+        self.zoom_scale.set(1.0)  # Сбрасываем зум
+        self.time_multiplier = 1.0  # Сбрасываем множитель
+        self.zoom_factor = 1.0  # Сбрасываем зум
+        self.speed_label.config(text="1.0x")  # Обновляем метку
 
         # Снимаем выделение
-        self.selected_planet = None
-        self.show_welcome_message()
+        self.selected_planet = None  # Убираем выбранную планету
+        self.show_welcome_message()  # Показываем приветствие
 
     def on_canvas_click(self, event):
         """Обработка клика по canvas для выбора планеты"""
         try:
             # Получаем координаты с учетом зума
-            canvas_center_x = 550
-            canvas_center_y = 400
+            canvas_center_x = 550  # Центр canvas по X
+            canvas_center_y = 400  # Центр canvas по Y
 
             # Проверяем, кликнули ли по планете
             clicked_planet = None
 
             for planet in self.planets_data:
                 # Вычисляем позицию планеты
-                distance = planet["distance"] * self.AU * self.zoom_factor
-                x = canvas_center_x + distance * math.cos(planet["angle"])
-                y = canvas_center_y + distance * math.sin(planet["angle"])
+                distance = planet["distance"] * self.AU * self.zoom_factor  # Расстояние от центра
+                x = canvas_center_x + distance * math.cos(planet["angle"])  # Координата X
+                y = canvas_center_y + distance * math.sin(planet["angle"])  # Координата Y
 
                 # Проверяем расстояние от клика до центра планеты
                 click_distance = math.sqrt((event.x - x) ** 2 + (event.y - y) ** 2)
-                if click_distance < (planet["radius"] * self.zoom_factor + 8):
-                    clicked_planet = planet["name"]
+                if click_distance < (planet["radius"] * self.zoom_factor + 8):  # Если попали в планету
+                    clicked_planet = planet["name"]  # Запоминаем название
                     break
 
             if clicked_planet:
-                self.selected_planet = clicked_planet
-                self.show_planet_info(clicked_planet)
+                self.selected_planet = clicked_planet  # Устанавливаем выбранную планету
+                self.show_planet_info(clicked_planet)  # Показываем информацию
         except:
             pass
 
     def draw_asteroid_belt(self, center_x, center_y):
         """Рисует пояс астероидов"""
         try:
-            belt_inner = 2.0 * self.AU * self.zoom_factor
-            belt_outer = 3.3 * self.AU * self.zoom_factor
+            belt_inner = 2.0 * self.AU * self.zoom_factor  # Внутренний радиус пояса
+            belt_outer = 3.3 * self.AU * self.zoom_factor  # Внешний радиус пояса
 
-            for _ in range(300):
-                angle = random.uniform(0, 2 * math.pi)
-                distance = random.uniform(belt_inner, belt_outer)
+            for _ in range(300):  # Рисуем 300 астероидов
+                angle = random.uniform(0, 2 * math.pi)  # Случайный угол
+                distance = random.uniform(belt_inner, belt_outer)  # Случайное расстояние
 
-                x = center_x + distance * math.cos(angle)
-                y = center_y + distance * math.sin(angle)
+                x = center_x + distance * math.cos(angle)  # Координата X
+                y = center_y + distance * math.sin(angle)  # Координата Y
 
-                size = random.uniform(0.8, 2.0)
-                brightness = random.randint(100, 200)
-                color = f'#{brightness:02x}{brightness:02x}{brightness:02x}'
+                size = random.uniform(0.8, 2.0)  # Случайный размер астероида
+                brightness = random.randint(100, 200)  # Случайная яркость
+                color = f'#{brightness:02x}{brightness:02x}{brightness:02x}'  # Цвет в HEX
 
                 self.canvas.create_oval(x - size, y - size, x + size, y + size,
-                                        fill=color, outline='')
+                                        fill=color, outline='')  # Рисуем астероид
         except:
             pass
 
     def draw_kuiper_belt(self, center_x, center_y):
         """Рисует пояс Койпера"""
         try:
-            belt_inner = 30.0 * self.AU * self.zoom_factor
-            belt_outer = 50.0 * self.AU * self.zoom_factor
+            belt_inner = 30.0 * self.AU * self.zoom_factor  # Внутренний радиус
+            belt_outer = 50.0 * self.AU * self.zoom_factor  # Внешний радиус
 
-            for _ in range(150):
-                angle = random.uniform(0, 2 * math.pi)
-                distance = random.uniform(belt_inner, belt_outer)
+            for _ in range(150):  # Рисуем 150 объектов
+                angle = random.uniform(0, 2 * math.pi)  # Случайный угол
+                distance = random.uniform(belt_inner, belt_outer)  # Случайное расстояние
 
-                x = center_x + distance * math.cos(angle)
-                y = center_y + distance * math.sin(angle)
+                x = center_x + distance * math.cos(angle)  # Координата X
+                y = center_y + distance * math.sin(angle)  # Координата Y
 
-                size = random.uniform(0.5, 1.2)
-                color = '#4a6a8a'
+                size = random.uniform(0.5, 1.2)  # Размер объекта
+                color = '#4a6a8a'  # Синеватый цвет
 
                 self.canvas.create_oval(x - size, y - size, x + size, y + size,
-                                        fill=color, outline='')
+                                        fill=color, outline='')  # Рисуем объект пояса Койпера
         except:
             pass
 
     def animate(self):
         """Анимация движения планет"""
-        if self.paused or not self.running:
+        if self.paused or not self.running:  # Если на паузе или программа остановлена
             return
 
         try:
@@ -896,23 +899,23 @@ class SolarSystemSimulation:
             self.draw_kuiper_belt(center_x, center_y)
 
             # Рисуем Солнце
-            sun_radius = 35 * self.zoom_factor
-            if sun_radius < 8:
+            sun_radius = 35 * self.zoom_factor  # Радиус Солнца с учетом зума
+            if sun_radius < 8:  # Минимальный размер
                 sun_radius = 8
 
             # Солнце с градиентом
             self.canvas.create_oval(center_x - sun_radius, center_y - sun_radius,
                                     center_x + sun_radius, center_y + sun_radius,
-                                    fill='#FFD700', outline='#FFA500', width=3)
+                                    fill='#FFD700', outline='#FFA500', width=3)  # Рисуем Солнце
 
             # Корона Солнца (мерцающая)
-            for i in range(16):
-                angle = i * math.pi / 8 + (self.time_multiplier * 0.05)
-                length = sun_radius * (1.8 + 0.4 * math.sin(angle * 2))
-                x1 = center_x + length * math.cos(angle)
-                y1 = center_y + length * math.sin(angle)
+            for i in range(16):  # 16 лучей короны
+                angle = i * math.pi / 8 + (self.time_multiplier * 0.05)  # Угол с учетом времени
+                length = sun_radius * (1.8 + 0.4 * math.sin(angle * 2))  # Длина луча
+                x1 = center_x + length * math.cos(angle)  # Конечная точка X
+                y1 = center_y + length * math.sin(angle)  # Конечная точка Y
                 self.canvas.create_line(center_x, center_y, x1, y1,
-                                        fill='#FF8C00', width=2, dash=(2, 3))
+                                        fill='#FF8C00', width=2, dash=(2, 3))  # Рисуем луч
 
             # Рисуем планеты
             planet_positions = {}
@@ -920,37 +923,37 @@ class SolarSystemSimulation:
             for planet in self.planets_data:
                 # Обновляем угол
                 if not self.paused:
-                    planet["angle"] += self.BASE_SPEED * planet["speed"] * self.time_multiplier
+                    planet["angle"] += self.BASE_SPEED * planet["speed"] * self.time_multiplier  # Приращение угла
 
                 # Вычисляем позицию
-                distance = planet["distance"] * self.AU * self.zoom_factor
-                x = center_x + distance * math.cos(planet["angle"])
-                y = center_y + distance * math.sin(planet["angle"])
+                distance = planet["distance"] * self.AU * self.zoom_factor  # Расстояние от Солнца
+                x = center_x + distance * math.cos(planet["angle"])  # Координата X
+                y = center_y + distance * math.sin(planet["angle"])  # Координата Y
 
                 # Проверяем, видна ли планета на экране
                 if -150 < x < 1250 and -150 < y < 950:
                     # Размер планеты
-                    radius = planet["radius"] * self.zoom_factor
-                    if radius < 2:
+                    radius = planet["radius"] * self.zoom_factor  # Радиус с учетом зума
+                    if radius < 2:  # Минимальный размер
                         radius = 2
 
-                    planet_positions[planet["name"]] = (x, y)
+                    planet_positions[planet["name"]] = (x, y)  # Сохраняем позицию
 
                     # Рисуем планету с эффектом объема
                     self.canvas.create_oval(x - radius, y - radius,
                                             x + radius, y + radius,
-                                            fill=planet["color"], outline='white', width=2)
+                                            fill=planet["color"], outline='white', width=2)  # Планета
 
                     # Для Сатурна рисуем кольца
                     if planet["name"] == "Сатурн":
                         self.canvas.create_oval(x - radius * 1.8, y - radius * 0.3,
                                                 x + radius * 1.8, y + radius * 0.3,
-                                                outline='#D2B48C', width=3, dash=(2, 2))
+                                                outline='#D2B48C', width=3, dash=(2, 2))  # Кольца Сатурна
 
                     # Блик на планете
                     self.canvas.create_oval(x - radius * 0.25, y - radius * 0.25,
                                             x + radius * 0.25, y + radius * 0.25,
-                                            fill='white', outline='', stipple='gray50')
+                                            fill='white', outline='', stipple='gray50')  # Блик
 
             # Рисуем названия планет (только для крупных)
             main_planets = ["Меркурий", "Венера", "Земля", "Марс", "Юпитер",
@@ -958,63 +961,63 @@ class SolarSystemSimulation:
 
             for name, (x, y) in planet_positions.items():
                 if name in main_planets:
-                    if y > 700:
-                        text_y = y - 35
+                    if y > 700:  # Если планета внизу экрана
+                        text_y = y - 35  # Текст сверху
                     else:
-                        text_y = y - 25
+                        text_y = y - 25  # Текст снизу
 
                     self.canvas.create_text(x, text_y, text=name, fill='white',
-                                            font=('Arial', 10, 'bold'))
+                                            font=('Arial', 10, 'bold'))  # Название планеты
 
             # Если выбрана планета, выделяем её
             if self.selected_planet:
                 for planet in self.planets_data:
                     if planet["name"] == self.selected_planet:
-                        distance = planet["distance"] * self.AU * self.zoom_factor
-                        x = center_x + distance * math.cos(planet["angle"])
-                        y = center_y + distance * math.sin(planet["angle"])
-                        radius = planet["radius"] * self.zoom_factor + 6
+                        distance = planet["distance"] * self.AU * self.zoom_factor  # Расстояние
+                        x = center_x + distance * math.cos(planet["angle"])  # Координата X
+                        y = center_y + distance * math.sin(planet["angle"])  # Координата Y
+                        radius = planet["radius"] * self.zoom_factor + 6  # Радиус выделения
 
                         # Рисуем рамку выделения
                         self.canvas.create_oval(x - radius, y - radius,
                                                 x + radius, y + radius,
-                                                outline='yellow', width=3, dash=(4, 4))
+                                                outline='yellow', width=3, dash=(4, 4))  # Пунктирная рамка
 
                         # Добавляем стрелку-указатель
                         self.canvas.create_line(x, y - radius - 20, x, y - radius - 8,
-                                                fill='yellow', width=3, arrow=tk.LAST)
+                                                fill='yellow', width=3, arrow=tk.LAST)  # Стрелка
                         break
 
             # Продолжаем анимацию
             if self.running:
-                self.animation_id = self.root.after(50, self.animate)
+                self.animation_id = self.root.after(50, self.animate)  # Запускаем следующий кадр через 50 мс
 
         except Exception as e:
             if self.running:
-                print(f"Ошибка в анимации: {e}")
+                print(f"Ошибка в анимации: {e}")  # Вывод ошибки
 
     def draw_stars(self):
         """Рисует звезды фона с мерцанием"""
         try:
             # Создаем звезды только если их нет или обновляем
-            if not hasattr(self, 'stars'):
-                self.stars = []
-                for i in range(300):
-                    x = random.randint(0, 1100)
-                    y = random.randint(0, 800)
-                    brightness = random.randint(100, 255)
-                    twinkle = random.uniform(0.5, 1.5)
-                    self.stars.append((x, y, brightness, twinkle))
+            if not hasattr(self, 'stars'):  # Если звезды еще не созданы
+                self.stars = []  # Список звезд
+                for i in range(300):  # Создаем 300 звезд
+                    x = random.randint(0, 1100)  # Случайная X координата
+                    y = random.randint(0, 800)  # Случайная Y координата
+                    brightness = random.randint(100, 255)  # Случайная яркость
+                    twinkle = random.uniform(0.5, 1.5)  # Коэффициент мерцания
+                    self.stars.append((x, y, brightness, twinkle))  # Добавляем звезду в список
 
             # Рисуем звезды
             for i, (x, y, brightness, twinkle) in enumerate(self.stars):
                 # Эффект мерцания
-                if random.random() < 0.01:
-                    brightness = random.randint(150, 255)
+                if random.random() < 0.01:  # С вероятностью 1%
+                    brightness = random.randint(150, 255)  # Меняем яркость
 
-                color = f'#{brightness:02x}{brightness:02x}{brightness:02x}'
-                size = random.uniform(0.8, 2.0)
-                self.canvas.create_oval(x, y, x + size, y + size, fill=color, outline='')
+                color = f'#{brightness:02x}{brightness:02x}{brightness:02x}'  # Цвет в HEX
+                size = random.uniform(0.8, 2.0)  # Случайный размер
+                self.canvas.create_oval(x, y, x + size, y + size, fill=color, outline='')  # Рисуем звезду
         except:
             pass
 
@@ -1022,42 +1025,44 @@ class SolarSystemSimulation:
         """Рисует орбиты планет с разными цветами"""
         try:
             for planet in self.planets_data:
-                distance = planet["distance"] * self.AU * self.zoom_factor
+                distance = planet["distance"] * self.AU * self.zoom_factor  # Радиус орбиты
 
                 # Выбираем цвет орбиты в зависимости от типа планеты
                 if planet["name"] in ["Меркурий", "Венера", "Земля", "Марс"]:
-                    color = '#2a4a6a'
+                    color = '#2a4a6a'  # Синий для внутренних планет
                 elif planet["name"] == "Церера":
-                    color = '#6a4a2a'
+                    color = '#6a4a2a'  # Коричневый для пояса астероидов
                 elif planet["name"] in ["Юпитер", "Сатурн", "Уран", "Нептун"]:
-                    color = '#4a6a2a'
+                    color = '#4a6a2a'  # Зеленый для газовых гигантов
                 elif planet["name"] in ["Плутон", "Хаумеа", "Макемаке", "Эрида"]:
-                    color = '#4a2a6a'
+                    color = '#4a2a6a'  # Фиолетовый для карликовых планет
                 else:
-                    color = '#2a4a4a'
+                    color = '#2a4a4a'  # Сине-зеленый для остальных
 
+                # Рисуем орбиту
                 self.canvas.create_oval(center_x - distance, center_y - distance,
                                         center_x + distance, center_y + distance,
-                                        outline=color, width=2, dash=(2, 4))
+                                        outline=color, width=2, dash=(2, 4))  # Пунктирная линия
         except:
             pass
 
     def on_closing(self):
         """Обработка закрытия окна"""
-        self.running = False
+        self.running = False  # Останавливаем анимацию
         if self.animation_id:
-            self.root.after_cancel(self.animation_id)
-        self.root.destroy()
+            self.root.after_cancel(self.animation_id)  # Отменяем запланированную анимацию
+        self.root.destroy()  # Закрываем окно
 
 
 if __name__ == "__main__":
+    """Точка входа в программу"""
     try:
-        root = tk.Tk()
-        app = SolarSystemSimulation(root)
-        root.mainloop()
+        root = tk.Tk()  # Создаем главное окно
+        app = SolarSystemSimulation(root)  # Создаем экземпляр приложения
+        root.mainloop()  # Запускаем главный цикл обработки событий
     except KeyboardInterrupt:
-        print("\nПрограмма остановлена пользователем")
-        sys.exit(0)
+        print("\nПрограмма остановлена пользователем")  # Обработка Ctrl+C
+        sys.exit(0)  # Выход с кодом 0 (успешно)
     except Exception as e:
-        print(f"Ошибка: {e}")
-        sys.exit(1)
+        print(f"Ошибка: {e}")  # Вывод ошибки
+        sys.exit(1)  # Выход с кодом 1 (ошибка)
